@@ -59,10 +59,16 @@ def plugin_named(some_name):
         return None
 
 
-def connect(repo_url, plugin_name):
+def connect(repo_url, plugin_name, options=None):
     '''Return a repo object for operations on our Munki repo'''
+    options = options or {}
     plugin = plugin_named(plugin_name or 'FileRepo')
     if plugin:
-        return plugin(repo_url)
+        try:
+            # try instantiating the repo by including the options dictionary
+            return plugin(repo_url, options)
+        except TypeError:
+            # if the plugin doesn't support options, initialize without them
+            return plugin(repo_url)
     else:
         raise RepoError('Could not find repo plugin named: %s' % plugin_name)
